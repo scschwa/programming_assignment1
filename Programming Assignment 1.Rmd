@@ -1,0 +1,137 @@
+---
+title: "Programming Assignment 1 - R Programming"
+author: "Stephen Schwartz"
+date: "Saturday, October 18, 2014"
+output: html_document
+---
+
+This is a document to use to wrap my first R-Programming assignment in so that I can learn both R and Knit.
+
+Below are the code bits for each of the three steps of the assignment.
+
+**Part 1**
+
+Write a function named 'pollutantmean' that calculates the mean of a pollutant (sulfate or nitrate) across a specified list of monitors. The function 'pollutantmean' takes three arguments: 'directory', 'pollutant', and 'id'. Given a vector monitor ID numbers, 'pollutantmean' reads that monitors' particulate matter data from the directory specified in the 'directory' argument and returns the mean of the pollutant across all of the monitors, ignoring any missing values coded as NA.
+
+```{r}
+directory<-"D://sven_ftw//My Documents//Coursera//Data Science//Class 2//specdata//"
+
+pollutantmean <- 
+function(directory, pollutant, id = 1:332) {
+  ## **Function Reference**:
+  
+  ## The function pollutantmean{} returns the mean of the pollutant across all monitors listed in the 'id' vector (ignoring NA values)
+  
+  ## 'directory' is a character vector of length 1 indicating the location of the CSV files.
+    
+  ## 'pollutant' is a character vector of length 1 indicating the name of the pollutant for which we will calculate the mean; Two allowable values are present 'sulfate' or 'nitrate'.
+  
+  ## 'id' is an integer vector indicating the monitor ID numbers to be used.
+
+  ## first format the ID to result in a 3 digit with leading 0's as necessary
+  
+  ## initialize a vector to use below
+  file_stack <- numeric()
+  
+  for(i in id) {
+  
+    id_fl<-formatC(i, width=3, format="d", flag="0")
+    current_file <- paste(directory, id_fl, ".csv", sep="")
+    my_data <- read.csv(current_file, header=TRUE, sep=",")
+    
+    ## remove missing values
+    my_data <- my_data[!is.na(my_data[, pollutant]),pollutant]
+    
+    ## print first 5 values
+    head(my_data)
+
+    ## stack files 
+    file_stack <- c(file_stack, my_data)
+  }
+
+  mean <- mean(file_stack)
+  return(mean)
+}
+
+## test
+pollutantmean(directory, "sulfate", 1:10)
+pollutantmean(directory, "nitrate", 70:72)
+pollutantmean(directory, "nitrate", 23)
+
+```
+
+**Part 2**
+
+Write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases. A prototype of this function follows
+
+```{r}
+complete <- function(directory, id = 1:332){
+  ## returns a data frame with two columns, the ID that ties to the monitor file and the number of observations
+  
+  ## 'directory' is a character vector of length 1 indicating the location of the CSV files.
+  
+  ## 'id' is an integer vector indicating the monitor ID numbers to be used.
+  
+  nobs <- numeric()
+   
+  for(i in id) {
+
+    id_fl<-formatC(i, width=3, format="d", flag="0")
+    current_file <- paste(directory, id_fl, ".csv", sep="")
+    my_data <- read.csv(current_file, header=TRUE, sep=",")
+    
+    ## print first 5 values
+    head(my_data)
+    
+    nobs = c(nobs, sum(complete.cases(my_data)))
+  }
+  
+  return(data.frame(id, nobs))
+}
+
+## testing
+complete(directory, 1)
+complete(directory, c(2,4,8,10,12))
+complete(directory, 30:25)
+complete(directory, 3)
+
+```
+
+```{r}
+corr <- function(directory, threshold = 0){
+
+  ## returns a numeric vector of correclations
+  
+  ## 'directory' is a character vector of length 1 indicating the location of the CSV files.
+  
+  ## 'threshold' is a numeric vector of length 1 indicating the number of completely observed observations (on all variables) required to compute the correlation between nitrate and sulfate; the default is 0
+ 
+  files <- complete(directory)
+  ids <- files[files["nobs"]>threshold, ]$id
+  corrR <- numeric()
+  for (i in ids) {
+       newFile = read.csv(paste(directory,formatC(i,width=3,flag="0"),".csv",sep=""))
+       goodRecords = newFile[complete.cases(newFile), ]
+       corrR <- c(corrR, cor(goodRecords$sulfate, goodRecords$nitrate))
+  }
+  return(corrR)
+}
+
+## testing
+cr <- corr(directory, 150)
+head(cr)
+summary(cr)
+
+cr <- corr(directory, 400)
+head(cr)
+summary(cr)
+
+cr <- corr(directory, 5000)
+summary(cr)
+length(cr)
+
+cr <- corr(directory)
+summary(cr)
+length(cr)
+```
+
