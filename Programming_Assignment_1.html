@@ -110,7 +110,7 @@ pollutantmean(directory, &quot;sulfate&quot;, 1:10)</code></pre>
 <pre class="r"><code>pollutantmean(directory, &quot;nitrate&quot;, 23)</code></pre>
 <pre><code>## [1] 1.281</code></pre>
 <p><strong>Part 2</strong></p>
-<p>Write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases. A prototype of this function follows</p>
+<p>Write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases.</p>
 <pre class="r"><code>complete &lt;- function(directory, id = 1:332){
   ## returns a data frame with two columns, the ID that ties to the monitor file and the number of observations
   
@@ -157,6 +157,8 @@ complete(directory, 1)</code></pre>
 <pre class="r"><code>complete(directory, 3)</code></pre>
 <pre><code>##   id nobs
 ## 1  3  243</code></pre>
+<p><strong>Part 3</strong></p>
+<p>Write a function that takes a directory of data files and a threshold for complete cases and calculates the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than the threshold. The function should return a vector of correlations for the monitors that meet the threshold requirement. If no monitors meet the threshold requirement, then the function should return a numeric vector of length 0.</p>
 <pre class="r"><code>corr &lt;- function(directory, threshold = 0){
 
   ## returns a numeric vector of correclations
